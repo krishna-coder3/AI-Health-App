@@ -1,0 +1,6 @@
+{
+  "name": "AI Health Companion",
+  "description": "Your all-in-one smart health companion with AI assistant, symptom checker, medical report summaries, doctor booking, health tracker, and trusted home remedies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

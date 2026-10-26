@@ -1,0 +1,55 @@
+package com.example.ui.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+
+private val LightColorScheme = lightColorScheme(
+    primary = HealthTealPrimary,
+    onPrimary = HealthTealOnPrimary,
+    primaryContainer = HealthTealContainer,
+    onPrimaryContainer = HealthTealOnContainer,
+    secondary = HealthBlueSecondary,
+    onSecondary = HealthBlueOnSecondary,
+    secondaryContainer = HealthBlueContainer,
+    onSecondaryContainer = HealthBlueOnContainer,
+    tertiary = HealthCoralTertiary,
+    onTertiary = HealthCoralOnTertiary,
+    tertiaryContainer = HealthCoralContainer,
+    background = HealthBackgroundLight,
+    surface = HealthSurfaceLight,
+    surfaceVariant = HealthSurfaceVariant,
+    onBackground = HealthOnBackground,
+    onSurface = HealthOnSurface,
+    onSurfaceVariant = HealthOnSurfaceVariant
+)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF4DD0E1),
+    onPrimary = Color(0xFF00363D),
+    primaryContainer = Color(0xFF004D56),
+    onPrimaryContainer = Color(0xFFE0F7FA),
+    secondary = Color(0xFF64B5F6),
+    onSecondary = Color(0xFF0D47A1),
+    secondaryContainer = Color(0xFF1565C0),
+    onSecondaryContainer = Color(0xFFE3F2FD),
+    tertiary = Color(0xFFFFB74D),
+    background = Color(0xFF0F172A),
+    surface = Color(0xFF1E293B),
+    surfaceVariant = Color(0xFF334155),
+    onBackground = Color(0xFFF8FAFC),
+    onSurface = Color(0xFFF1F5F9),
+    onSurfaceVariant = Color(0xFF94A3B8)
+)
+
+@Composable
+fun MyApplicationTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+}

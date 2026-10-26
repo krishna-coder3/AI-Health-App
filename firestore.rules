@@ -1,0 +1,260 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwnerAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email == "krrrsingh190@gmail.com" &&
+        request.auth.token.email_verified == true;
+    }
+
+    function isValidUser(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.email is string && data.email.size() <= 200 &&
+        data.role in ['user', 'owner'] &&
+        (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+        (!('age' in data) || data.age is int) &&
+        (!('gender' in data) || (data.gender is string && data.gender.size() <= 20)) &&
+        (!('height' in data) || (data.height is number)) &&
+        (!('weight' in data) || (data.weight is number)) &&
+        (!('allergies' in data) || (data.allergies is string && data.allergies.size() <= 1000)) &&
+        (!('conditions' in data) || (data.conditions is string && data.conditions.size() <= 1000)) &&
+        (!('languagePreference' in data) || (data.languagePreference is string && data.languagePreference in ['Hindi', 'English', 'Hinglish'])) &&
+        (!('isBlocked' in data) || data.isBlocked is bool) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isOwnerAdmin());
+      allow list: if isOwnerAdmin();
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        incoming().userId == request.auth.uid &&
+        (isOwnerAdmin() || incoming().role == 'user') &&
+        (!('isBlocked' in incoming()) || incoming().isBlocked == false || isOwnerAdmin()) &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidUser(incoming());
+      allow update: if isSignedIn() &&
+        (request.auth.uid == userId || isOwnerAdmin()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        (isOwnerAdmin() || (incoming().role == existing().role && incoming().isBlocked == existing().isBlocked)) &&
+        isValidUser(incoming());
+      allow delete: if isOwnerAdmin();
+    }
+
+    function isValidRemedy(data) {
+      return data.nameEn is string && data.nameEn.size() <= 200 &&
+        data.nameHi is string && data.nameHi.size() <= 200 &&
+        data.category is string && data.category.size() <= 100 &&
+        data.doctorNote is string && data.doctorNote.size() <= 2000 &&
+        (!('ingredients' in data) || data.ingredients is list) &&
+        (!('method' in data) || data.method is list) &&
+        (!('benefits' in data) || data.benefits is list) &&
+        (!('precautions' in data) || data.precautions is list) &&
+        (!('whoShouldAvoid' in data) || data.whoShouldAvoid is list) &&
+        (!('isDesi' in data) || data.isDesi is bool) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /remedies/{remedyId} {
+      allow read: if isSignedIn();
+      allow create: if isOwnerAdmin() &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidRemedy(incoming());
+      allow update: if isOwnerAdmin() &&
+        incoming().createdAt == existing().createdAt &&
+        isValidRemedy(incoming());
+      allow delete: if isOwnerAdmin();
+    }
+
+    function isValidDoctor(data) {
+      return data.name is string && data.name.size() <= 150 &&
+        data.specialty is string && data.specialty.size() <= 100 &&
+        data.fee is int && data.fee >= 0 &&
+        (!('rating' in data) || data.rating is number) &&
+        (!('experienceYears' in data) || data.experienceYears is int) &&
+        (!('hospital' in data) || (data.hospital is string && data.hospital.size() <= 200)) &&
+        (!('bio' in data) || (data.bio is string && data.bio.size() <= 1500)) &&
+        (!('availableSlots' in data) || data.availableSlots is list) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /doctors/{doctorId} {
+      allow read: if isSignedIn();
+      allow create: if isOwnerAdmin() &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidDoctor(incoming());
+      allow update: if isOwnerAdmin() &&
+        incoming().createdAt == existing().createdAt &&
+        isValidDoctor(incoming());
+      allow delete: if isOwnerAdmin();
+    }
+
+    function isValidAppointment(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.doctorId is string && data.doctorId.size() <= 128 &&
+        data.doctorName is string && data.doctorName.size() <= 150 &&
+        data.date is string && data.date.size() <= 50 &&
+        data.timeSlot is string && data.timeSlot.size() <= 50 &&
+        data.status in ['booked', 'cancelled', 'rescheduled', 'completed'] &&
+        (!('userName' in data) || (data.userName is string && data.userName.size() <= 100)) &&
+        (!('userEmail' in data) || (data.userEmail is string && data.userEmail.size() <= 200)) &&
+        (!('specialty' in data) || (data.specialty is string && data.specialty.size() <= 100)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('fee' in data) || data.fee is int) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /appointments/{appointmentId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isOwnerAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isOwnerAdmin());
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().status == 'booked' &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidAppointment(incoming());
+      allow update: if isSignedIn() &&
+        (existing().userId == request.auth.uid || isOwnerAdmin()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        isValidAppointment(incoming());
+      allow delete: if isSignedIn() && (existing().userId == request.auth.uid || isOwnerAdmin());
+    }
+
+    function isValidHealthLog(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.date is string && data.date.size() <= 50 &&
+        (!('systolic' in data) || data.systolic is int) &&
+        (!('diastolic' in data) || data.diastolic is int) &&
+        (!('heartRate' in data) || data.heartRate is int) &&
+        (!('bloodSugar' in data) || data.bloodSugar is int) &&
+        (!('weight' in data) || data.weight is number) &&
+        (!('waterIntakeMl' in data) || data.waterIntakeMl is int) &&
+        (!('sleepHours' in data) || data.sleepHours is number) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /healthLogs/{logId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidHealthLog(incoming());
+      allow update: if isSignedIn() &&
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        isValidHealthLog(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    function isValidChat(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.messagesJson is string && data.messagesJson.size() <= 200000 &&
+        (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /chats/{chatId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidChat(incoming());
+      allow update: if isSignedIn() &&
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        isValidChat(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    function isValidReport(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.title is string && data.title.size() <= 200 &&
+        data.summaryText is string && data.summaryText.size() <= 20000 &&
+        (!('abnormalValues' in data) || data.abnormalValues is list) &&
+        (!('suggestedQuestions' in data) || data.suggestedQuestions is list) &&
+        (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000)) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /reports/{reportId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+        incoming().userId == request.auth.uid &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidReport(incoming());
+      allow update: if isSignedIn() &&
+        existing().userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        isValidReport(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    function isValidAnnouncement(data) {
+      return data.title is string && data.title.size() <= 200 &&
+        data.content is string && data.content.size() <= 5000 &&
+        (!('date' in data) || (data.date is string && data.date.size() <= 50)) &&
+        (!('authorEmail' in data) || (data.authorEmail is string && data.authorEmail.size() <= 200)) &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if isSignedIn();
+      allow create: if isOwnerAdmin() &&
+        incoming().createdAt is timestamp &&
+        incoming().createdAt <= request.time &&
+        isValidAnnouncement(incoming());
+      allow update: if isOwnerAdmin() &&
+        incoming().createdAt == existing().createdAt &&
+        isValidAnnouncement(incoming());
+      allow delete: if isOwnerAdmin();
+    }
+
+    function isValidAppSettings(data) {
+      return data.aiEnabled is bool &&
+        data.maintenanceMode is bool &&
+        (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    match /appSettings/{settingId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwnerAdmin() && isValidAppSettings(incoming());
+      allow delete: if isOwnerAdmin();
+    }
+  }
+}

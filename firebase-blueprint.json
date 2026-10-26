@@ -1,0 +1,197 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role and health settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "owner"] },
+        "displayName": { "type": "string" },
+        "age": { "type": "integer" },
+        "gender": { "type": "string" },
+        "height": { "type": "number" },
+        "weight": { "type": "number" },
+        "allergies": { "type": "string" },
+        "conditions": { "type": "string" },
+        "languagePreference": { "type": "string", "enum": ["Hindi", "English", "Hinglish"] },
+        "isBlocked": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "role", "createdAt"]
+    },
+    "Remedy": {
+      "title": "Remedy",
+      "description": "Home remedies and desi nuskhe catalog",
+      "type": "object",
+      "properties": {
+        "nameEn": { "type": "string" },
+        "nameHi": { "type": "string" },
+        "category": { "type": "string" },
+        "ingredients": { "type": "array" },
+        "method": { "type": "array" },
+        "benefits": { "type": "array" },
+        "precautions": { "type": "array" },
+        "whoShouldAvoid": { "type": "array" },
+        "doctorNote": { "type": "string" },
+        "isDesi": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["nameEn", "nameHi", "category", "doctorNote", "createdAt"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Available doctor for appointment booking",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "specialty": { "type": "string" },
+        "fee": { "type": "integer" },
+        "rating": { "type": "number" },
+        "experienceYears": { "type": "integer" },
+        "hospital": { "type": "string" },
+        "bio": { "type": "string" },
+        "availableSlots": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "specialty", "fee", "createdAt"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Doctor appointment booked by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "doctorId": { "type": "string" },
+        "doctorName": { "type": "string" },
+        "specialty": { "type": "string" },
+        "date": { "type": "string" },
+        "timeSlot": { "type": "string" },
+        "status": { "type": "string", "enum": ["booked", "cancelled", "rescheduled", "completed"] },
+        "notes": { "type": "string" },
+        "fee": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "doctorId", "doctorName", "date", "timeSlot", "status", "createdAt"]
+    },
+    "HealthLog": {
+      "title": "HealthLog",
+      "description": "Vitals and daily wellness tracking log",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "systolic": { "type": "integer" },
+        "diastolic": { "type": "integer" },
+        "heartRate": { "type": "integer" },
+        "bloodSugar": { "type": "integer" },
+        "weight": { "type": "number" },
+        "waterIntakeMl": { "type": "integer" },
+        "sleepHours": { "type": "number" },
+        "notes": { "type": "string" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "createdAt"]
+    },
+    "ChatSession": {
+      "title": "ChatSession",
+      "description": "AI Health Companion conversation history",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "messagesJson": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "messagesJson", "createdAt"]
+    },
+    "MedicalReport": {
+      "title": "MedicalReport",
+      "description": "Uploaded medical report and AI generated summary",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "summaryText": { "type": "string" },
+        "abnormalValues": { "type": "array" },
+        "suggestedQuestions": { "type": "array" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "summaryText", "createdAt"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Health broadcast or notice from admin",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "authorEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "aiEnabled": { "type": "boolean" },
+        "maintenanceMode": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["aiEnabled", "maintenanceMode"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "User" },
+      "description": "User profiles"
+    },
+    "/remedies/{remedyId}": {
+      "schema": { "$ref": "Remedy" },
+      "description": "Home remedies catalog"
+    },
+    "/doctors/{doctorId}": {
+      "schema": { "$ref": "Doctor" },
+      "description": "Registered doctors list"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": { "$ref": "Appointment" },
+      "description": "Appointments for consultations"
+    },
+    "/healthLogs/{logId}": {
+      "schema": { "$ref": "HealthLog" },
+      "description": "User personal health logs"
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "ChatSession" },
+      "description": "AI consultation chat sessions"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "MedicalReport" },
+      "description": "Medical reports analyzed by AI"
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "Announcement" },
+      "description": "Owner announcements to users"
+    },
+    "/appSettings/{settingId}": {
+      "schema": { "$ref": "AppSettings" },
+      "description": "App operational settings"
+    }
+  }
+}
